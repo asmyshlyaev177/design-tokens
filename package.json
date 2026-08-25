@@ -1,6 +1,6 @@
 {
   "name": "@asmyshlyaev177/design-tokens",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "OKLCH design tokens with a checked WCAG contrast contract, shared across asmyshlyaev177's sites",
   "keywords": [
     "accessibility",

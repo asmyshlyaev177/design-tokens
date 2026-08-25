@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/asmyshlyaev177/design-tokens/compare/design-tokens-v1.0.0...design-tokens-v1.1.0) (2026-08-25)
+
+
+### Features
+
+* playwright helper ([3e75909](https://github.com/asmyshlyaev177/design-tokens/commit/3e75909ecf9e7cf2720780af4909c28a323e1bf0))
+
 ## 1.0.0 (2026-08-25)
 
 
