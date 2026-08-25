@@ -12,7 +12,9 @@ export default defineConfig({
   sourcemap: true,
   /* The optional peers must never be inlined — a consumer that installed none
      of them still has to be able to import the CSS side of this package. */
-  external: ["@playwright/test", "playwright-lighthouse", "lighthouse"],
+  deps: {
+    neverBundle: ["@playwright/test", "playwright-lighthouse", "lighthouse"],
+  },
   hooks: {
     "build:done": () => {
       // Ships beside dist/index.js so `new URL("./tokens.css", import.meta.url)`
