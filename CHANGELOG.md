@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/asmyshlyaev177/design-tokens/compare/design-tokens-v1.1.0...design-tokens-v1.1.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* better code blocks and panels ([5e6d07b](https://github.com/asmyshlyaev177/design-tokens/commit/5e6d07bd0f863b60732644280ae4149bde8abe8b))
+* type error ([c9ecc2d](https://github.com/asmyshlyaev177/design-tokens/commit/c9ecc2d9f3f4c6e00156ef9def3ab5c9c13ccb74))
+
 ## [1.1.0](https://github.com/asmyshlyaev177/design-tokens/compare/design-tokens-v1.0.0...design-tokens-v1.1.0) (2026-08-25)
 
 
