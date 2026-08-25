@@ -197,6 +197,44 @@ keys, so an unheld category never executes and its audits cannot be inspected.
 `failedAudits(lhr, "seo")` is there for exactly that case: a `noindex` page is
 _meant_ to fail `is-crawlable` and nothing else.
 
+## Rendered-contrast helper
+
+Lighthouse audits light mode only, scores no element without a text node, and
+never opens a modal. `check-tokens` proves the ramp is sound; this proves the
+pages use it.
+
+```ts
+import {
+  auditContrast,
+  contrastFailures,
+  describeContrast,
+} from "@asmyshlyaev177/design-tokens/contrast";
+
+test.use({ colorScheme: "dark" });
+
+test("/blog clears both floors", async ({ page }) => {
+  await page.goto("/blog");
+  const { findings, unresolved } = await auditContrast(page, {
+    ignore: ["pre.astro-code"],
+  });
+
+  expect(findings.length).toBeGreaterThan(20);
+  expect(unresolved).toBeLessThan(findings.length);
+  expect(contrastFailures(findings).map(describeContrast)).toEqual([]);
+});
+```
+
+Every visible text node is scored on both models. `unresolved` counts nodes
+skipped because an image or gradient sat under the text — assert on it, or a
+gradient on `<body>` leaves the suite silently green.
+
+The floors are the weakest the contract grants any token at that size, so a
+finding means the page reached for the wrong token, not that the ramp is off.
+Pass `tiers` to hold a project to more.
+
+`root` scopes the walk to a modal or region; `ignore` drops subtrees whose
+palette is not yours, such as a vendored syntax-highlighting theme.
+
 ## Node API
 
 ```js
@@ -229,13 +267,16 @@ plus declarations in `dist/`. `tokens.css` lives in `src/` and is copied beside
 same in the sources and in the build.
 
 ```sh
-pnpm test        # runs the .ts sources directly — node strips the types
-pnpm typecheck   # tsc --noEmit over src and test
+pnpm test        # vitest, over the .ts sources
+pnpm test:watch
+pnpm typecheck   # tsc --noEmit over src, test and the config files
 pnpm check       # the shipped tokens against their own defaults
 pnpm build
 ```
 
 There is no build step between editing a source file and running the suite.
+`tsconfig.json` is the project an editor and `typecheck` read, and covers
+everything; `tsconfig.build.json` narrows it to `src` for tsdown.
 
 ## Releasing
 

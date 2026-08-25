@@ -5,8 +5,8 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "types": ["node"],
-    /* Playwright's own declarations reference DOM globals this package does
-       not have. Checking them proves nothing about our code. */
+    /* Playwright's and vitest's declarations pull in globals this package
+       does not use. Checking them proves nothing about our code. */
     "skipLibCheck": true,
 
     "strict": true,
@@ -17,18 +17,13 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
 
-    /* Relative imports carry a `.ts` extension so node can run the sources
-       directly by stripping types — no build step for the tests. tsc rewrites
-       them to `.js` on the way into dist, in the declarations too. */
+    /* Relative imports carry a `.ts` extension so `pnpm check` can run
+       src/bin/check-tokens.ts through node's type stripping, unbuilt. */
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "resolveJsonModule": true,
 
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "dist",
-    "rootDir": "src"
+    "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "test", "types", "*.ts"]
 }

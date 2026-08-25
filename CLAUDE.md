@@ -132,6 +132,40 @@ Both ramps live in one `light-dark()` per token. Three traps, all of which bit:
 Lightning CSS lowers `light-dark()` into `--lightningcss-light` /
 `--lightningcss-dark` pairs. That is transparent — don't chase it in built CSS.
 
+## Rendered-contrast audit
+
+`src/contrast.ts`, on the `./contrast` subpath. Lighthouse audits light mode
+only, scores no element without a text node, and never opens a modal — a dark
+link colour, four icon tints and a 10px label inside a modal all sat under
+floor while a suite read 100 on every page.
+
+Four decisions that are not obvious from the code:
+
+- **Colours are composited by the browser's own canvas, not parsed.** Chrome
+  serialises a computed colour in the space it was authored in, so
+  `getComputedStyle` hands back `oklch()`, `color()` and `rgba()`
+  interchangeably. Painting each background layer onto a 1×1 canvas and reading
+  the pixel resolves every syntax and does the alpha blend the browser would.
+- **Transitions are awaited before sampling.** Reveal-on-scroll elements read
+  as invisible text mid-fade — a hero band measured 1.33:1 at opacity 0.11.
+  `test.use({ reducedMotion: "reduce" })` is not the fix: it is not a declared
+  test option in Playwright 1.62, so it type-errors and does nothing. Infinite
+  animations are excluded; they never finish.
+- **Text over an image or gradient is skipped and counted.** The pixel under it
+  is unknowable from computed style. `unresolved` is returned so a consumer can
+  assert on it; without that, a gradient on `<body>` leaves the suite green
+  with nothing measured.
+- **The floor is the weakest the contract grants any token at that size** — Lc
+  60, what `--link` and `--accent-on-soft` are held to — not `--muted`'s 70.
+  A DOM node does not say which token it used, so anything stricter fails
+  sanctioned tokens: at Lc 70 this flagged 710 nodes on one site, of which two
+  were real. A finding means the page reached for the wrong token; the ramp's
+  own quality is `check-tokens`' job.
+
+Wired into a real site it found 122 `text-ink/{65..85}` tints, five
+`color-mix(--ink N%)` text colours, `--accent` used as 13px text, and two
+elements at 1.33:1 that Lighthouse scored 100.
+
 ## Releasing
 
 Conventional commits; release-please opens the PR, merging publishes with

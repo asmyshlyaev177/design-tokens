@@ -4,7 +4,8 @@
  * `check-tokens` run, and the all-hue sweep further down.
  */
 import assert from "node:assert/strict";
-import test from "node:test";
+
+import { test } from "vitest";
 
 import { checkContract, describe, failures } from "../src/contract.ts";
 import { readHues } from "../src/hues.ts";

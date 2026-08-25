@@ -32,7 +32,11 @@
       "types": "./dist/lighthouse.d.mts",
       "default": "./dist/lighthouse.mjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./contrast": {
+      "types": "./dist/contrast.d.mts",
+      "default": "./dist/contrast.mjs"
+    }
   },
   "bin": {
     "check-tokens": "dist/bin/check-tokens.mjs"
@@ -49,11 +53,12 @@
   },
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc --project tsconfig.test.json",
-    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --project tsconfig.json",
+    "test": "vitest run",
     "check": "node src/bin/check-tokens.ts src/tokens.css",
     "lint": "prettier --check .",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40",
@@ -77,7 +82,8 @@
     "colorparsley": "^0.1.8",
     "prettier": "^3.6.2",
     "tsdown": "^0.22.14",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   },
   "publishConfig": {
     "access": "public",

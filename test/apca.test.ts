@@ -3,7 +3,8 @@
  * consumers install nothing; that trade only holds if the two agree.
  */
 import assert from "node:assert/strict";
-import test from "node:test";
+
+import { test } from "vitest";
 
 import { APCAcontrast, sRGBtoY } from "apca-w3";
 import { colorParsley } from "colorparsley";

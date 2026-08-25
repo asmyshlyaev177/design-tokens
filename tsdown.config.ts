@@ -3,7 +3,13 @@ import { copyFileSync } from "node:fs";
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/lighthouse.ts", "src/bin/check-tokens.ts"],
+  entry: [
+    "src/index.ts",
+    "src/contrast.ts",
+    "src/lighthouse.ts",
+    "src/bin/check-tokens.ts",
+  ],
+  tsconfig: "./tsconfig.build.json",
   format: "esm",
   platform: "node",
   target: "node20",
