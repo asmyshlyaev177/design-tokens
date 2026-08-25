@@ -1,3 +1,4 @@
 node_modules/
 dist/
+/tokens.css
 *.log

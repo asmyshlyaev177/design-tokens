@@ -1,6 +1,6 @@
 {
   "name": "@asmyshlyaev177/design-tokens",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OKLCH design tokens with a checked WCAG contrast contract, shared across asmyshlyaev177's sites",
   "keywords": [
     "design-tokens",
@@ -37,7 +37,8 @@
     "check-tokens": "dist/bin/check-tokens.mjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "tokens.css"
   ],
   "sideEffects": [
     "*.css"
