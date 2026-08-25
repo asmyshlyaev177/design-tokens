@@ -1,0 +1,83 @@
+{
+  "name": "@asmyshlyaev177/design-tokens",
+  "version": "0.0.0",
+  "description": "OKLCH design tokens with a checked WCAG contrast contract, shared across asmyshlyaev177's sites",
+  "keywords": [
+    "design-tokens",
+    "css-custom-properties",
+    "oklch",
+    "wcag",
+    "contrast",
+    "light-dark",
+    "accessibility"
+  ],
+  "license": "MIT",
+  "author": "Aleksandr Smyshliaev <asmyshlyaev177@gmail.com>",
+  "homepage": "https://asmyshlyaev177.dev/design",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asmyshlyaev177/design-tokens.git"
+  },
+  "bugs": "https://github.com/asmyshlyaev177/design-tokens/issues",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./tokens.css": "./dist/tokens.css",
+    "./lighthouse": {
+      "types": "./dist/lighthouse.d.mts",
+      "default": "./dist/lighthouse.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "check-tokens": "./dist/bin/check-tokens.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --project tsconfig.test.json",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "check": "node src/bin/check-tokens.ts src/tokens.css",
+    "lint": "prettier --check .",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40",
+    "lighthouse": ">=11",
+    "playwright-lighthouse": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    },
+    "lighthouse": {
+      "optional": true
+    },
+    "playwright-lighthouse": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^26.3.0",
+    "prettier": "^3.6.2",
+    "tsdown": "^0.22.14",
+    "typescript": "^7.0.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "packageManager": "pnpm@11.1.0"
+}
