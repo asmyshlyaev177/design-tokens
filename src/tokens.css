@@ -17,10 +17,12 @@
 
   /* --- surfaces --------------------------------------------------------- */
 
-  /* Light separates surfaces with --line; --bg and --surface share a
-     lightness. Dark separates them by fill. */
+  /* Each ground is a visible step from the one under it, in both themes.
+     Light --surface used to share --bg's lightness (0.9718 vs 0.972) and be
+     separated by --line alone: every panel painted on the page ground read as
+     one flat field, and a hover fill of --surface did nothing at all. */
   --bg: light-dark(oklch(0.972 0.0018 var(--neutral-hue)), oklch(0.1611 0.0139 var(--neutral-hue)));
-  --surface: light-dark(oklch(0.9718 0.0014 var(--neutral-hue)), oklch(0.183 0.016 var(--neutral-hue)));
+  --surface: light-dark(oklch(0.9575 0.0027 var(--neutral-hue)), oklch(0.183 0.016 var(--neutral-hue)));
   --surface-2: light-dark(oklch(0.943 0.004 var(--neutral-hue)), oklch(0.246 0.0208 var(--neutral-hue)));
   --line: light-dark(oklch(0.899 0.0068 var(--neutral-hue)), oklch(0.2571 0.0198 var(--neutral-hue)));
   --line-strong: light-dark(oklch(0.822 0.0084 var(--neutral-hue)), oklch(0.34 0.02 var(--neutral-hue)));

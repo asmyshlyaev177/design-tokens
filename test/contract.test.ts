@@ -125,6 +125,31 @@ test("no token resolves identically in both themes", () => {
   }
 });
 
+test("each ground is a visible step from the one under it", () => {
+  // --surface once shared --bg's lightness in light (1.00:1), so a panel or a
+  // hover fill painted on the page ground was invisible without a border.
+  const FLOOR = 1.03;
+  const themes = parseTokens(tokensCss);
+  for (const theme of ["light", "dark"] as const) {
+    const scope = themes[theme];
+    const rgb = (name: string) => {
+      const oklch = parseOklch(resolve(scope.get(name) ?? "", scope));
+      assert.ok(oklch, `${name} did not resolve to a colour`);
+      return oklchToRgb(oklch);
+    };
+    for (const [under, over] of [
+      ["--bg", "--surface"],
+      ["--surface", "--surface-2"],
+    ]) {
+      const ratio = contrast(rgb(under), rgb(over));
+      assert.ok(
+        ratio >= FLOOR,
+        `${theme}: ${over} on ${under} is ${ratio.toFixed(3)}:1, under ${FLOOR}`,
+      );
+    }
+  }
+});
+
 test("an alpha tint of --ink is not a substitute for --muted", () => {
   // Pins why --muted exists: the tints it replaced measure under AA.
   const { light } = parseTokens(tokensCss);

@@ -58,7 +58,11 @@ because the knobs are the one thing each project changes; a central test that
 hardcoded them would vouch for a configuration a project may no longer have.
 
 Grounds are `--bg`, `--surface`, `--surface-2`. `--surface-2` is the one that
-decides it — the lightest ground a token can legitimately sit on. Measuring
+decides it — the lightest ground a token can legitimately sit on. Each ground is
+also a **visible** step from the one under it, ≥1.03:1, asserted in both themes:
+light `--surface` used to share `--bg`'s lightness and lean on `--line` for the
+edge, so a panel or a hover fill painted straight on the page ground rendered as
+one flat field. Measuring
 against `--bg` alone flatters everything, which is how a `--ink/55` tint once
 shipped as body text at 3.99:1.
 
@@ -149,8 +153,19 @@ Four decisions that are not obvious from the code:
 - **Transitions are awaited before sampling.** Reveal-on-scroll elements read
   as invisible text mid-fade — a hero band measured 1.33:1 at opacity 0.11.
   `test.use({ reducedMotion: "reduce" })` is not the fix: it is not a declared
-  test option in Playwright 1.62, so it type-errors and does nothing. Infinite
-  animations are excluded; they never finish.
+  test option in Playwright 1.62, so it type-errors and does nothing.
+
+  Two kinds of animation are excluded because awaiting them hangs the audit
+  instead of settling it. An infinite one is the obvious case. The other is
+  **progress-based** — `animation-timeline: view()` or `scroll()` — whose
+  `finished` promise stays pending for as long as the element sits inside its
+  range, and which reports `iterations: 1` like any other, so the timeline is
+  what has to be tested. `x-profile-location` reveals 40 elements that way and
+  every page timed out at 180s against the first version of this. A
+  scroll-driven animation is a parked state rather than a transient one, so
+  sampling it where it stands is the correct reading. A five-second deadline
+  backs both up, for the pause states neither test names.
+
 - **Text over an image or gradient is skipped and counted.** The pixel under it
   is unknowable from computed style. `unresolved` is returned so a consumer can
   assert on it; without that, a gradient on `<body>` leaves the suite green

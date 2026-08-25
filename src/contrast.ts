@@ -17,16 +17,31 @@ export interface EvaluatablePage {
  * `reducedMotion: "reduce"` does not reliably pin them. Infinite animations
  * are left alone — they never finish.
  */
+/**
+ * Waits out every animation that will actually end, so nothing is sampled
+ * mid-fade. Infinite and progress-based ones never end and are skipped — a
+ * scroll-driven animation is a parked state, so sampling it where it stands is
+ * correct. The deadline covers pause states. See CLAUDE.md.
+ */
+const SETTLE_DEADLINE_MS = 5_000;
+
 async function settleAnimations(page: EvaluatablePage): Promise<void> {
   await page.evaluate(
-    () =>
-      Promise.all(
-        document
-          .getAnimations()
-          .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
-          .map((a) => a.finished.catch(() => undefined)),
-      ).then(() => undefined),
-    null,
+    (deadline: number) =>
+      Promise.race([
+        Promise.all(
+          document
+            .getAnimations()
+            .filter(
+              (a) =>
+                a.timeline instanceof DocumentTimeline &&
+                a.effect?.getComputedTiming().iterations !== Infinity,
+            )
+            .map((a) => a.finished.catch(() => undefined)),
+        ),
+        new Promise((resolve) => setTimeout(resolve, deadline)),
+      ]).then(() => undefined),
+    SETTLE_DEADLINE_MS,
   );
 }
 
