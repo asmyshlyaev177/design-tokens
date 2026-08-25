@@ -29,7 +29,7 @@ jobs:
       contents: read
       # Required for npm provenance — the attestation is signed with this
       # workflow's OIDC identity, so a consumer can verify the tarball was
-      # built here rather than uploaded from a laptop.
+      # built here rather than uploaded from a laptop
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
