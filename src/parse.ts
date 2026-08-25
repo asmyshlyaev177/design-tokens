@@ -1,10 +1,4 @@
-/**
- * Parser for tokens.css.
- *
- * Takes the stylesheet as text rather than reading it, so the same code serves
- * a build-time page that gets it from a bundler as `?raw` and the node tests
- * that read it from disk.
- */
+/** Parser for tokens.css. Takes text, so a bundler's `?raw` works too. */
 
 export type Theme = "light" | "dark";
 
@@ -14,7 +8,7 @@ export type Scope = Map<string, string>;
 export interface ParsedTokens {
   light: Scope;
   dark: Scope;
-  /** Token name -> the `/* --- heading --- *\/` it was declared under. */
+  /** Token name -> the group heading it was declared under. */
   groups: Map<string, string>;
 }
 
@@ -56,11 +50,7 @@ function groupsOf(block: string): Map<string, string> {
   return out;
 }
 
-/**
- * Picks one side of every `light-dark(a, b)` in a value. Both ramps live in
- * the same declaration, so reading a theme means choosing an argument rather
- * than reading a second block.
- */
+/** Picks one side of every `light-dark(a, b)` in a value. */
 export function pickTheme(value: string, theme: Theme): string {
   const index = value.indexOf("light-dark(");
   if (index === -1) return value;
@@ -96,11 +86,7 @@ export function resolve(value: string, scope: Scope): string {
   return out;
 }
 
-/**
- * @param source contents of tokens.css
- * @param overrides knob values to substitute, standing in for what a consuming
- *   stylesheet sets after the import
- */
+/** @param overrides knob values, standing in for what a consumer sets. */
 export function parseTokens(
   source: string,
   overrides: Record<string, string | number> = {},
@@ -120,13 +106,7 @@ export function parseTokens(
   return { light, dark, groups: groupsOf(block) };
 }
 
-/**
- * Every `light-dark()` must take exactly two arguments. A shadow is itself a
- * comma-separated list, so wrapping one whole rather than wrapping its colour
- * silently produces a four-argument call that the browser drops.
- *
- * @returns the malformed calls
- */
+/** @returns `light-dark()` calls that do not take exactly two arguments. */
 export function malformedLightDark(source: string): string[] {
   const code = source.replace(/\/\*[\s\S]*?\*\//g, "");
   const bad: string[] = [];

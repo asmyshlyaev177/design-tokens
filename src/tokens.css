@@ -1,68 +1,37 @@
-/* =============================================================================
-   Design tokens — asmyshlyaev177
-   @asmyshlyaev177/design-tokens · documented at https://asmyshlyaev177.dev/design
-
-   Framework-agnostic CSS custom properties, shared verbatim across the
-   portfolio, state-in-url, test-proxy-recorder, react-horizontal-scrolling-menu
-   and x-profile-location.
-
-   Import it; never edit it in place. A project differs along exactly two axes:
-
-     1. --brand-hue / --accent-hue / --neutral-hue below, set in the consuming
-        stylesheet's own :root after the import.
-     2. --font-sans / --font-display / --font-mono, which this file deliberately
-        does NOT define — see the note in :root — because each site self-hosts
-        different faces for its own payload reasons.
-
-   Everything else is identical everywhere, which is the point. Run
-   `check-tokens <your-stylesheet.css>` to assert the contrast contract holds
-   at the hues your project actually sets.
-   ============================================================================= */
+/* @asmyshlyaev177/design-tokens · https://asmyshlyaev177.dev/design
+   Import; never edit in place. Set --brand-hue / --accent-hue / --neutral-hue
+   and the --font-* families in your own stylesheet after the import.
+   Verify with `check-tokens <your-stylesheet.css>`. */
 
 :root {
   /* --- the per-project knobs ------------------------------------------- */
 
-  /* OKLCH hue angles — the whole of a project's colour identity. Defaults
-     below; each consuming stylesheet overrides them in its own :root after the
-     import, so this file ships unmodified and the version in the lockfile says
-     exactly which ramp a project is on. In use: portfolio 264/60 ·
-     test-proxy-recorder 262/29 · rhsm 15/265 · state-in-url 48/48 ·
-     x-profile-location 183/183. */
+  /* In use: portfolio 264/60 · test-proxy-recorder 262/29 · rhsm 15/265 ·
+     state-in-url 48/48 · x-profile-location 183/183. */
   --brand-hue: 264;
   --accent-hue: 60;
   --neutral-hue: 264;
 
-  /* No --font-* defaults live here on purpose. Tailwind puts @theme vars in
-     `@layer theme`, and an unlayered rule beats a layered one at any order, so
-     a fallback declared in this file would silently outrank the real families
-     every consuming project sets for itself. Fonts are a per-project axis:
-     each host stylesheet declares its own, and none of them inherit here. */
+  /* No --font-* here on purpose: an unlayered :root rule would outrank the
+     families Tailwind emits into @layer theme. See CLAUDE.md. */
 
   /* --- surfaces --------------------------------------------------------- */
 
-  /* Light separates surfaces with --line, not with fill: --bg and --surface
-     are deliberately the same lightness. Dark separates them by fill. */
-  --bg: light-dark(oklch(0.993 0.001 var(--neutral-hue)), oklch(0.1611 0.0139 var(--neutral-hue)));
-  --surface: light-dark(oklch(0.9928 0.0007 var(--neutral-hue)), oklch(0.183 0.016 var(--neutral-hue)));
-  --surface-2: light-dark(oklch(0.964 0.003 var(--neutral-hue)), oklch(0.246 0.0208 var(--neutral-hue)));
-  --line: light-dark(oklch(0.9196 0.0064 var(--neutral-hue)), oklch(0.2571 0.0198 var(--neutral-hue)));
-  --line-strong: light-dark(oklch(0.84 0.008 var(--neutral-hue)), oklch(0.34 0.02 var(--neutral-hue)));
+  /* Light separates surfaces with --line; --bg and --surface share a
+     lightness. Dark separates them by fill. */
+  --bg: light-dark(oklch(0.972 0.0018 var(--neutral-hue)), oklch(0.1611 0.0139 var(--neutral-hue)));
+  --surface: light-dark(oklch(0.9718 0.0014 var(--neutral-hue)), oklch(0.183 0.016 var(--neutral-hue)));
+  --surface-2: light-dark(oklch(0.943 0.004 var(--neutral-hue)), oklch(0.246 0.0208 var(--neutral-hue)));
+  --line: light-dark(oklch(0.899 0.0068 var(--neutral-hue)), oklch(0.2571 0.0198 var(--neutral-hue)));
+  --line-strong: light-dark(oklch(0.822 0.0084 var(--neutral-hue)), oklch(0.34 0.02 var(--neutral-hue)));
 
   /* --- text ------------------------------------------------------------- */
 
-  /* Three weights. Each contract below is the WORST ratio across every hue in
-     use and against --surface-2, the lightest ground any of them can sit on —
-     not against --bg, which flatters them:
-       --ink    body and headings          16.15:1
-       --muted  secondary text, any size    4.73:1  (WCAG AA needs 4.5)
-       --faint  large text and 3:1 UI only  3.06:1  (fails AA at body size)
-
-     Reach for --muted rather than an alpha tint of --ink. A `/55` tint of
-     --ink measures 3.99:1 and a `/50` measures 3.43:1 — both under AA, both
-     shipped here once, both invisible until Lighthouse caught them. */
-  --ink: light-dark(oklch(0.1972 0.0132 var(--neutral-hue)), oklch(0.9496 0.0051 var(--neutral-hue)));
-  --muted: light-dark(oklch(0.53 0.012 var(--neutral-hue)), oklch(0.65 0.012 var(--neutral-hue)));
-  --faint: light-dark(oklch(0.6322 0.012 var(--neutral-hue)), oklch(0.545 0.012 var(--neutral-hue)));
+  /* --ink body · --muted secondary at any size · --faint large text and
+     3:1 UI only. Never an alpha tint of --ink: /55 is 3.99:1, /50 is 3.43:1. */
+  --ink: light-dark(oklch(0.22 0.0132 var(--neutral-hue)), oklch(0.9496 0.0051 var(--neutral-hue)));
+  --muted: light-dark(oklch(0.476 0.012 var(--neutral-hue)), oklch(0.836 0.012 var(--neutral-hue)));
+  --faint: light-dark(oklch(0.60 0.012 var(--neutral-hue)), oklch(0.694 0.012 var(--neutral-hue)));
 
   /* --- brand ------------------------------------------------------------ */
 
@@ -70,22 +39,19 @@
   --primary-strong: light-dark(oklch(0.4 0.19 var(--brand-hue)), oklch(0.62 0.19 var(--brand-hue)));
   --primary-soft: light-dark(oklch(0.95 0.025 var(--brand-hue)), oklch(0.25 0.05 var(--brand-hue)));
   --on-primary: oklch(0.99 0.002 var(--neutral-hue));
-  /* Brand-coloured text sitting on --primary-soft. Darker than --primary,
-     which is a fill and clears AA only against --bg. */
-  --primary-on-soft: light-dark(oklch(0.4 0.19 var(--brand-hue)), oklch(0.72 0.15 var(--brand-hue)));
+  /* Brand text on --primary-soft. --primary is a fill; it clears AA only on --bg. */
+  --primary-on-soft: light-dark(oklch(0.4 0.19 var(--brand-hue)), oklch(0.827 0.15 var(--brand-hue)));
 
   --accent: light-dark(oklch(0.5553 0.1455 var(--accent-hue)), oklch(0.7686 0.1647 var(--accent-hue)));
   --accent-soft: light-dark(oklch(0.95 0.03 var(--accent-hue)), oklch(0.26 0.05 var(--accent-hue)));
-  /* Same story as --primary-on-soft: the plain accent measures 4.30:1 on its
-     own 10% tint, just under AA. */
-  --accent-on-soft: light-dark(oklch(0.49 0.1324 var(--accent-hue)), oklch(0.7686 0.1647 var(--accent-hue)));
+  /* Same split: plain --accent is 4.30:1 on its own 10% tint. */
+  --accent-on-soft: light-dark(oklch(0.49 0.1324 var(--accent-hue)), oklch(0.846 0.1647 var(--accent-hue)));
 
-  /* Brand-coloured *text* on --bg. Separate from --primary, which is a FILL:
-     --primary is held dark enough that --on-primary clears AA on top of it, at
-     every hue, which leaves it too dark to read as a link on a dark ground.
-     The two cannot be one token — at cyan there is no lightness that satisfies
-     both. Light mode needs no distinction, so --link defers to --primary. */
-  --link: light-dark(var(--primary), oklch(0.62 0.19 var(--brand-hue)));
+  /* Brand-coloured *text*, never the --primary fill. See CLAUDE.md. */
+  --link: light-dark(
+    oklch(0.475 0.2172 var(--brand-hue)),
+    oklch(0.857 0.19 var(--brand-hue))
+  );
 
   --focus: var(--primary);
 
@@ -107,8 +73,7 @@
   --radius-m: 0.5rem;
   --radius-l: 0.75rem;
 
-  /* A shadow is itself a comma-separated list and light-dark() takes exactly
-     two arguments, so here it is the colour that gets wrapped, not the list. */
+  /* light-dark() takes two arguments, so the colour is wrapped, not the list. */
   --shadow-1:
     0 1px 2px light-dark(oklch(0.2 0.01 var(--neutral-hue) / 0.06), oklch(0 0 0 / 0.4)),
     0 4px 12px light-dark(oklch(0.2 0.01 var(--neutral-hue) / 0.07), oklch(0 0 0 / 0.45));
@@ -128,26 +93,12 @@
   --z-sticky: 30;
   --z-modal: 70;
 
-  /* Both ramps live in the light-dark() calls above; this is what picks
-     between them, and what the opt-ins below override. */
+  /* Picks between the light-dark() halves above; the opt-ins below override it. */
   color-scheme: light dark;
 }
 
-/* The theme opt-ins. Each sets `color-scheme` and nothing else: every token
-   above carries both of its values in one light-dark() call, so there is no
-   second ramp to keep in step. Both spellings are honoured because the
-   consuming projects picked different ones — `.dark` (the portfolio) and
-   `[data-theme]` (the landings).
-
-   `:root` is load-bearing, not decoration. Unscoped, `[data-theme="light"]`
-   also matches any element that uses the attribute for its own purposes — the
-   portfolio's theme menu labels its three buttons `data-theme="light|dark|
-   system"`, and each one obediently rendered its own tokens in that theme.
-
-   A document that sets neither class follows the reader's OS through
-   `color-scheme: light dark`. That makes an explicit *light* choice a real
-   choice: it has to add `.light`, because merely removing `.dark` now means
-   "ask the OS" rather than "be light". */
+/* Opt-ins set `color-scheme` and nothing else. `:root` is load-bearing, and
+   an explicit light choice needs `.light` — see CLAUDE.md. */
 
 :root[data-theme="dark"],
 :root.dark {
@@ -159,7 +110,7 @@
   color-scheme: light;
 }
 
-/* One focus treatment, everywhere. Never removed without a replacement. */
+/* One focus treatment. Never remove without a replacement. */
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;

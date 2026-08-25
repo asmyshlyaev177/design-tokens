@@ -1,47 +1,24 @@
 /**
- * One Lighthouse audit of one URL, for Playwright suites.
- *
- * Four repositories had grown a byte-for-byte copy of this block — the same
- * CDP port arithmetic, the same desktop config, the same try/finally, and the
- * same three comments explaining why each is necessary. The pages audited and
- * the thresholds they are held to are genuinely per-project; everything below
- * is not.
- *
- * Peer dependencies are optional and imported here rather than at module load,
- * so a project that wants only the CSS never installs Chromium tooling.
+ * One Lighthouse audit of one URL, for Playwright suites. Peers are optional
+ * and imported lazily so a CSS-only consumer installs no Chromium tooling.
  */
 
 /** Lighthouse category id -> minimum score. */
 export type Thresholds = Record<string, number>;
 
-/**
- * Lighthouse's own result shape, kept loose on purpose: pinning it would make
- * this package's types fail whenever a consumer runs a different Lighthouse
- * major, for no benefit — callers reach into `lhr` for one audit at a time.
- */
+/** Loose on purpose: pinning it breaks on a consumer's different Lighthouse major. */
 export type Lhr = any;
 
 export interface AuditOptions {
   /** Absolute URL to audit. */
   url: string;
   thresholds: Thresholds;
-  /**
-   * Categories to *run*. Defaults to the threshold keys, which is
-   * playwright-lighthouse's own behaviour — pass this explicitly when a page
-   * is held to fewer categories than it should run, or the unheld ones never
-   * execute and their audits cannot be inspected.
-   */
+  /** Categories to *run*. Defaults to the threshold keys; pass explicitly
+   *  when a page is held to fewer categories than it should run. */
   categories?: string[];
-  /**
-   * CDP port. Defaults to 9333 + the worker index, which keeps parallel
-   * workers off each other's port.
-   */
+  /** CDP port. Defaults to 9333 + worker index, so workers cannot collide. */
   port?: number;
-  /**
-   * Lighthouse config. Defaults to the bundled desktop config: Lighthouse's
-   * mobile default applies a 4x CPU slowdown, which turns the performance
-   * score into a measurement of the runner rather than of the site.
-   */
+  /** Defaults to desktop: the mobile default's 4x CPU slowdown measures the runner. */
   config?: object;
   waitUntil?: "load" | "domcontentloaded" | "networkidle" | "commit";
   disableLogs?: boolean;
@@ -52,13 +29,7 @@ export interface AuditResult {
   artifacts: unknown;
 }
 
-/**
- * Runs the audit and throws if any threshold is missed.
- *
- * @returns the full result, so a caller can assert on individual audits — a
- *   `noindex` page, for instance, is meant to fail `is-crawlable` and nothing
- *   else.
- */
+/** Throws if any threshold is missed. Returns `lhr` for per-audit assertions. */
 export async function auditPage({
   url,
   thresholds,
@@ -78,8 +49,7 @@ export async function auditPage({
         ),
   ]);
 
-  // Lighthouse drives the browser over CDP, which needs a debugging port
-  // Playwright's own `page` fixture does not expose.
+  // Lighthouse needs a CDP port that Playwright's `page` fixture does not expose.
   const cdpPort = port ?? 9333 + (test.info().workerIndex ?? 0);
   const browser = await chromium.launch({
     args: [`--remote-debugging-port=${cdpPort}`],
@@ -102,7 +72,7 @@ export async function auditPage({
   }
 }
 
-/** The four categories every one of these sites runs. */
+/** The four categories every consuming site runs. */
 export const CATEGORIES = [
   "performance",
   "accessibility",

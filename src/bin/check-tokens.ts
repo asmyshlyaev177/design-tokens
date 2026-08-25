@@ -1,10 +1,6 @@
 #!/usr/bin/env node
 /**
- * Asserts the contrast contract at the hues *this project* sets.
- *
- * The check has to run in the consuming repo rather than centrally: the hue
- * knobs are the one thing each project changes, so they are the one thing a
- * central test cannot know. Point it at whichever stylesheet sets them.
+ * Asserts the contrast contract at the hues this project sets.
  *
  *   check-tokens src/styles/app.css
  */
@@ -15,7 +11,7 @@ import { checkContract, describe, failures } from "../contract.ts";
 import { readHues } from "../hues.ts";
 import { malformedLightDark } from "../parse.ts";
 
-/** Both resolve against dist/bin/ once built, and src/bin/ when type-stripped. */
+/** Resolves against dist/bin/ when built, src/bin/ when type-stripped. */
 const read = (relative: string) =>
   readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8");
 
@@ -57,7 +53,9 @@ const shown = Object.entries(hues)
 if (!quiet) {
   console.log(`${name}@${version}`);
   console.log(`hues: ${shown || "none set — using the token file's defaults"}`);
-  console.log(`${results.length} pairs checked, ${bad.length} failing\n`);
+  console.log(
+    `${results.length} pairs checked against WCAG 2 and APCA, ${bad.length} failing\n`,
+  );
 }
 
 for (const result of bad) console.error(`  ✖ ${describe(result)}`);

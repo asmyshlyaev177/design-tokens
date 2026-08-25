@@ -1,10 +1,6 @@
 /**
- * Colour conversion for the design tokens: HSL/hex in, OKLCH out, plus the
- * WCAG contrast ratio between any two of them.
- *
- * Exists because the token file is authored in OKLCH but the AA floor it has
- * to clear is defined in sRGB relative luminance, so the two spaces have to
- * meet somewhere. Matrices are the Ottosson OKLab constants.
+ * OKLCH <-> sRGB and the WCAG contrast ratio: tokens are authored in OKLCH,
+ * the AA floor is defined in sRGB luminance. Ottosson OKLab matrices.
  */
 
 /** sRGB channels, each 0..1. */
@@ -139,11 +135,7 @@ export function contrast(rgbA: Rgb, rgbB: Rgb): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/**
- * Flattens a translucent foreground over an opaque background, matching what
- * `color-mix(in oklab, <fg> N%, transparent)` puts on screen. An alpha tint
- * measured against the raw foreground reads far better than it looks.
- */
+/** Flattens a tint over its ground, as `color-mix(… N%, transparent)` renders. */
 export const flatten = (fg: Rgb, bg: Rgb, alpha: number): Rgb => ({
   r: fg.r * alpha + bg.r * (1 - alpha),
   g: fg.g * alpha + bg.g * (1 - alpha),

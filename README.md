@@ -58,24 +58,71 @@ would vouch for a configuration a project might no longer have.
 
 ### What is measured
 
-| Token               | Against                            | Floor |
-| ------------------- | ---------------------------------- | ----- |
-| `--ink`             | `--bg`, `--surface`, `--surface-2` | 4.5:1 |
-| `--muted`           | `--bg`, `--surface`, `--surface-2` | 4.5:1 |
-| `--faint`           | `--bg`, `--surface`, `--surface-2` | 3:1   |
-| `--link`            | `--bg`                             | 4.5:1 |
-| `--primary-on-soft` | `--primary-soft`                   | 4.5:1 |
-| `--accent-on-soft`  | `--accent-soft`                    | 4.5:1 |
-| `--on-primary`      | `--primary`                        | 4.5:1 |
+| Token               | Against                              | Floor |
+| ------------------- | ------------------------------------ | ----- |
+| `--ink`             | `--bg`, `--surface`, `--surface-2`   | 4.5:1 |
+| `--muted`           | `--bg`, `--surface`, `--surface-2`   | 4.5:1 |
+| `--faint`           | `--bg`, `--surface`, `--surface-2`   | 3:1   |
+| `--link`            | `--bg`                               | 4.5:1 |
+| `--primary-on-soft` | `--primary-soft` + all three grounds | 4.5:1 |
+| `--accent-on-soft`  | `--accent-soft` + all three grounds  | 4.5:1 |
+| `--on-primary`      | `--primary`                          | 4.5:1 |
 
-In both themes, so 26 assertions. `--surface-2` is in the list because it is
+Each pair is held to **both** WCAG 2 and APCA, in both themes — 38 assertions.
+`--surface-2` is in the list because it is
 the lightest ground a token can legitimately sit on; measuring against `--bg`
 alone flatters everything, which is how a `--ink/55` alpha tint once shipped as
 body text at 3.99:1.
 
+The `*-on-soft` tokens are measured on the grounds as well as on their own tint
+because they are the only brand-coloured _text_ tokens — a coloured label on a
+plain surface has nothing else to reach for. `--primary` and `--accent` are
+fills, held dark enough that `--on-primary` clears AA on top of them, and a
+page that reaches for one as small text is relying on the ground being nearly
+white.
+
 The ramp fixes lightness and chroma per token and varies only hue, so the
 guarantee is hue-independent: the suite asserts it at all 72 five-degree steps
 around the wheel, not only at the angles in use. Pick any hue.
+
+### Why two contrast models
+
+WCAG 2's ratio is one formula applied to both polarities, and it flatters light
+text on a dark ground. This system shipped a dark `--muted` at 6.0:1 — past AA
+without argument — that [APCA](https://git.apcacontrast.com/documentation/APCA_in_a_Nutshell.html)
+rates **Lc 42**: under half of body level, and below even its non-text tier.
+Nothing in the suite could see it, because nothing was asking the second
+question.
+
+**APCA is not a standard, and this package does not claim it is.** It is an
+independent algorithm proposed as a candidate for WCAG 3. The
+[WCAG 3 working draft](https://github.com/w3c/wcag3) does not adopt it and does
+not mention it anywhere in the repository; its contrast requirement is still
+the literal placeholder `@@[contrast measure to be determined]`, with an
+editor's note that "the contrast algorithm used in WCAG 3 is yet to be
+determined". WCAG 2.x AA is the normative gate here. APCA is the second
+opinion, and it is the one that catches dark-theme regressions.
+
+The Lc floors are this package's own, calibrated against what shipping design
+systems reach rather than against APCA's tiers:
+
+|                 | dark secondary text | dark link |
+| --------------- | ------------------- | --------- |
+| GitHub Primer   | Lc 44               | Lc 44     |
+| Tailwind        | Lc 52               | —         |
+| IBM Carbon      | Lc 71               | Lc 55     |
+| Material 3      | Lc 72               | Lc 72     |
+| **this system** | **Lc 72**           | **Lc 71** |
+
+APCA's own guidance is Lc 75 minimum for body text, but that is unreachable for
+_coloured_ text on a dark ground: at this ramp's chroma it needs L 0.975, which
+is no longer a brand colour but a near-white tint of one. The floors used are
+70 for secondary text, 60 for coloured text and 45 for the icon/large-text
+tier — the top of the field rather than the top of the scale.
+
+APCA is reimplemented in `src/apca.ts` so that installing the CSS pulls in
+nothing; `test/apca.test.ts` pins it against the official `apca-w3` package,
+which is a devDependency.
 
 ## Three rules the ramp encodes
 
@@ -86,7 +133,12 @@ Each was a real bug before it was a token.
 - **`--link` is not `--primary`.** `--primary` is a _fill_, held dark enough
   that `--on-primary` clears AA on top of it. At cyan there is no lightness
   that is both that and readable as a link on a dark ground, so they are two
-  tokens.
+  tokens. `--accent-on-soft` is the same split for the accent.
+- **The light ground is not white.** `--bg` sits at L 0.972 — paper, not a
+  lightbox. The softening is in the _ground_, not in the text: `--ink` holds
+  body copy at ~16:1, and `--muted` and `--faint` were re-solved against the
+  new ground rather than left to drift under it. Dropping the ground without
+  moving the text is what turns a softer page into a harder-to-read one.
 - **The opt-in selectors are `:root`-scoped.** Unscoped, `[data-theme="light"]`
   matches any element using the attribute for its own purposes — a theme menu
   labelling its buttons `data-theme="light|dark|system"` rendered each one in

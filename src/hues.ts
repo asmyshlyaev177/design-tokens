@@ -1,10 +1,6 @@
 /**
- * Reads a consuming project's hue knobs out of its own stylesheet.
- *
- * Deliberately not block-aware: a project may set these in `:root`, in
- * Tailwind v4's `@theme`, or in a layer, and which one it picked is its
- * business. The declaration is what matters, and later files win so a caller
- * can pass a base stylesheet followed by an override.
+ * Reads a project's hue knobs out of its own stylesheet. Not block-aware on
+ * purpose — `:root`, `@theme` and layers all count. Later sources win.
  */
 
 export interface Hues {

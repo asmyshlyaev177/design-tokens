@@ -1,20 +1,4 @@
-/**
- * The contrast contract, checked against a token file at a given set of hues.
- *
- * Every ratio here is measured in OKLCH-authored colour but judged in sRGB
- * relative luminance, because that is where WCAG defines the floor.
- *
- * Two decisions are load-bearing:
- *
- * `--surface-2` is in GROUNDS. It is the lightest ground a token can sit on,
- * so it is the one that decides the contract; measuring against `--bg` alone
- * flatters everything and is how a `/55` alpha tint shipped as body text in
- * the first place.
- *
- * The hues come from the caller. The projects consuming this package each set
- * their own, and a contract that hardcoded the known ones would vouch for a
- * configuration a project might no longer have.
- */
+/** The contrast contract. Rationale in CLAUDE.md. */
 import {
   AA_LARGE,
   AA_NORMAL,
@@ -24,58 +8,73 @@ import {
   type Rgb,
 } from "./color.ts";
 import { parseTokens, resolve, type Scope, type Theme } from "./parse.ts";
+import { lc, LC_BODY, LC_BODY_MIN, LC_LARGE, LC_UI } from "./apca.ts";
 import type { Hues } from "./hues.ts";
 
-/** The lightest ground each foreground token has to clear. */
+/** --surface-2 is the lightest ground, so it decides the contract. */
 const GROUNDS = ["--bg", "--surface", "--surface-2"] as const;
 
 export const THEMES: Theme[] = ["light", "dark"];
 
 interface Pair {
   token: string;
-  /** A list when the token can land on any surface; one entry when the
-   *  pairing is specific — text on its own tint, a label on its own fill. */
   on: readonly string[];
+  /** WCAG 2 ratio. */
   floor: number;
+  /** APCA Lc, calibrated against shipping design systems — see CLAUDE.md. */
+  lcFloor: number;
   why: string;
 }
 
 const PAIRS: Pair[] = [
-  { token: "--ink", on: GROUNDS, floor: AA_NORMAL, why: "body text" },
+  {
+    token: "--ink",
+    on: GROUNDS,
+    floor: AA_NORMAL,
+    lcFloor: LC_BODY,
+    why: "body text",
+  },
   {
     token: "--muted",
     on: GROUNDS,
     floor: AA_NORMAL,
+    lcFloor: 70,
     why: "secondary text must not need a size exemption",
   },
   {
     token: "--faint",
     on: GROUNDS,
     floor: AA_LARGE,
+    lcFloor: LC_UI,
     why: "large text and icons only",
   },
   {
     token: "--link",
     on: ["--bg"],
     floor: AA_NORMAL,
+    lcFloor: LC_LARGE,
     why: "--primary is a fill and is not readable as link text at every hue",
   },
   {
     token: "--primary-on-soft",
-    on: ["--primary-soft"],
+    on: ["--primary-soft", ...GROUNDS],
     floor: AA_NORMAL,
-    why: "brand text on its own tint",
+    lcFloor: LC_LARGE,
+    why: "brand text, on its own tint and on any surface",
   },
   {
     token: "--accent-on-soft",
-    on: ["--accent-soft"],
+    // The only accent-coloured *text* token; --accent is a fill.
+    on: ["--accent-soft", ...GROUNDS],
     floor: AA_NORMAL,
-    why: "accent text on its own tint",
+    lcFloor: LC_LARGE,
+    why: "accent text, on its own tint and on any surface",
   },
   {
     token: "--on-primary",
     on: ["--primary"],
     floor: AA_NORMAL,
+    lcFloor: LC_BODY_MIN,
     why: "label on the brand fill",
   },
 ];
@@ -86,7 +85,10 @@ export interface ContractResult {
   theme: Theme;
   ratio: number;
   floor: number;
+  lc: number;
+  lcFloor: number;
   why: string;
+  /** True only when the pair satisfies both models. */
   passes: boolean;
 }
 
@@ -96,12 +98,7 @@ function rgbOf(scope: Scope, name: string): Rgb | null {
   return oklch ? oklchToRgb(oklch) : null;
 }
 
-/**
- * @param source contents of tokens.css
- * @param hues the consuming project's knob values; anything omitted falls back
- *   to the token file's own default
- * @returns every pair, passing and failing alike
- */
+/** @returns every pair, passing and failing alike. */
 export function checkContract(
   source: string,
   hues: Partial<Hues> = {},
@@ -115,7 +112,7 @@ export function checkContract(
   const results: ContractResult[] = [];
 
   for (const theme of THEMES) {
-    for (const { token, on, floor, why } of PAIRS) {
+    for (const { token, on, floor, lcFloor, why } of PAIRS) {
       for (const ground of on) {
         const fg = rgbOf(scopes[theme], token);
         const bg = rgbOf(scopes[theme], ground);
@@ -126,20 +123,25 @@ export function checkContract(
             theme,
             ratio: 0,
             floor,
+            lc: 0,
+            lcFloor,
             why: `${token} or ${ground} did not resolve to a colour`,
             passes: false,
           });
           continue;
         }
         const ratio = contrast(fg, bg);
+        const lcValue = lc(fg, bg);
         results.push({
           token,
           on: ground,
           theme,
           ratio,
           floor,
+          lc: lcValue,
+          lcFloor,
           why,
-          passes: ratio >= floor,
+          passes: ratio >= floor && lcValue >= lcFloor,
         });
       }
     }
@@ -150,12 +152,14 @@ export function checkContract(
 export const failures = (results: ContractResult[]): ContractResult[] =>
   results.filter((r) => !r.passes);
 
-export const describe = ({
-  token,
-  on,
-  theme,
-  ratio,
-  floor,
-  why,
-}: ContractResult): string =>
-  `${theme}: ${token} on ${on} is ${ratio.toFixed(2)}:1, needs ${floor}:1 — ${why}`;
+export const describe = (r: ContractResult): string => {
+  const parts: string[] = [];
+  if (r.ratio < r.floor) {
+    parts.push(`WCAG ${r.ratio.toFixed(2)}:1, needs ${r.floor}:1`);
+  }
+  if (r.lc < r.lcFloor) {
+    parts.push(`APCA Lc ${r.lc.toFixed(0)}, needs ${r.lcFloor}`);
+  }
+  const failed = parts.length ? parts.join(" and ") : "passes both models";
+  return `${r.theme}: ${r.token} on ${r.on} — ${failed} — ${r.why}`;
+};
