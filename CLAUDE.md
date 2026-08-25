@@ -142,3 +142,12 @@ printing the whole tarball listing, which reads like success.
 A token rename or removal is breaking for every consuming stylesheet: `feat!:`
 or a `BREAKING CHANGE:` footer. Adding a token is `feat:`; retuning a value is
 `fix:` when it repairs a contrast failure.
+
+release-please needs **Settings → Actions → General → Workflow permissions →
+"Allow GitHub Actions to create and approve pull requests"** enabled, or it
+fails with `GitHub Actions is not permitted to create or approve pull
+requests`. The setting is per-repo and per-org; the org value wins when it is
+off.
+
+Actions are pinned by commit SHA with the tag in a trailing comment. Bump both
+together — a stale pin is a silent security debt.
