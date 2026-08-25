@@ -140,7 +140,7 @@ test("each ground is a visible step from the one under it", () => {
     for (const [under, over] of [
       ["--bg", "--surface"],
       ["--surface", "--surface-2"],
-    ]) {
+    ] as const) {
       const ratio = contrast(rgb(under), rgb(over));
       assert.ok(
         ratio >= FLOOR,
