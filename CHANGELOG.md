@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/asmyshlyaev177/design-tokens/compare/design-tokens-v1.1.1...design-tokens-v1.2.0) (2026-08-27)
+
+
+### Features
+
+* add axe-core checks ([91eb85d](https://github.com/asmyshlyaev177/design-tokens/commit/91eb85d66c998399c04241b4b7758d507fbcaa14))
+
 ## [1.1.1](https://github.com/asmyshlyaev177/design-tokens/compare/design-tokens-v1.1.0...design-tokens-v1.1.1) (2026-08-25)
 
 
