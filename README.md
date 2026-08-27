@@ -235,6 +235,58 @@ Pass `tiers` to hold a project to more.
 `root` scopes the walk to a modal or region; `ignore` drops subtrees whose
 palette is not yours, such as a vendored syntax-highlighting theme.
 
+## Accessibility helper
+
+The rules a contrast audit does not cover, from axe-core. Lighthouse bundles axe
+too, but runs 66 of its 104 rules, in one theme, and scores a weighted average
+rather than pass/fail — `region`, `nested-interactive`, `duplicate-id-active`,
+`scrollable-region-focusable` and the whole `landmark-*` family never run there.
+
+```ts
+import {
+  auditA11y,
+  describeViolation,
+} from "@asmyshlyaev177/design-tokens/axe";
+
+test("/blog has no WCAG A/AA violations", async ({ page }) => {
+  await page.goto("/blog");
+  const { violations, incomplete, passes } = await auditA11y(page, {
+    tags: COMPREHENSIVE_TAGS,
+    exclude: ["iframe.giscus-frame"],
+  });
+
+  expect(passes).toBeGreaterThan(10);
+  expect(violations.map(describeViolation)).toEqual([]);
+  expect(incomplete.map((r) => r.id)).toEqual(REVIEWED);
+});
+```
+
+Requires `@axe-core/playwright`, an optional peer — it is imported lazily, so a
+CSS-only consumer installs none of it.
+
+**axe's own `color-contrast` and `color-contrast-enhanced` are disabled by
+default.** `auditContrast` scores the same nodes against APCA as well as WCAG 2,
+walks both themes and settles animations first; running both duplicates every
+finding and contradicts it wherever the two disagree. `disableRules` replaces
+that list rather than merging into it, so pass `[]` to hand contrast back to axe.
+
+`incomplete` is returned rather than dropped. It is where axe puts text over a
+background image, a partially obscured element, and anything below the fold —
+assert that its rule ids stay within a reviewed list, or those findings live
+unread in a section of the report nobody opens.
+
+`tags` defaults to `WCAG_AA_TAGS` — WCAG 2.0/2.1/2.2 at A and AA. Pass
+`COMPREHENSIVE_TAGS` to add axe's `best-practice` rules: the landmark structure
+checks (`region`, `landmark-unique`, `landmark-no-duplicate-*`),
+`focus-order-semantics` and `page-has-heading-one`. Not required by any
+conformance level, and the failures are real — two unlabelled `<nav>` landmarks
+read as "navigation" twice with nothing to tell them apart. AAA and
+`experimental` stay out of both: `color-contrast-enhanced` is superseded by
+`auditContrast`, and a gate that fails on an aspiration gets turned off.
+
+`include` and `exclude` take one selector per root — the package calls axe once
+per entry, because an array argument means a frame chain, not a set of roots.
+
 ## Node API
 
 ```js

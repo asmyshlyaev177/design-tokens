@@ -181,6 +181,47 @@ Wired into a real site it found 122 `text-ink/{65..85}` tints, five
 `color-mix(--ink N%)` text colours, `--accent` used as 13px text, and two
 elements at 1.33:1 that Lighthouse scored 100.
 
+## axe audit
+
+`src/axe.ts`, on the `./axe` subpath. Covers the rules that have nothing to do
+with colour, so a consumer needs one Playwright suite rather than a second
+runner. `@axe-core/playwright` is an optional peer, imported lazily.
+
+It exists because Lighthouse's accessibility category is not axe. Lighthouse
+13.4 bundles axe-core 4.12 and runs 76 audits, of which 66 map to axe rule ids
+and 10 are manual checklist items that never execute — against axe's 104 rules.
+The 38 it never runs include `region`, `nested-interactive`,
+`duplicate-id-active`, `scrollable-region-focusable`, `frame-title-unique`,
+`p-as-heading` and every `landmark-*` rule. Its score is also a weighted
+average, not a per-rule verdict.
+
+Three decisions that are not obvious from the code:
+
+- **`color-contrast` and `color-contrast-enhanced` are disabled by default.**
+  `auditContrast` scores the same nodes on APCA as well as WCAG 2, walks both
+  themes and settles animations first. Leaving axe's version on duplicates
+  every finding and contradicts it wherever the two disagree. `disableRules`
+  _replaces_ `SUPERSEDED_RULES` rather than merging, so `[]` hands contrast
+  back to axe — merging would have made the default impossible to undo.
+- **`incomplete` is returned, not dropped.** It is where axe puts text over a
+  background image, a partially obscured element and anything below the fold.
+  Most suites assert on violations alone, which is how those disappear. The
+  intended shape is an allowlist of reviewed rule ids, so a new one fails once
+  and gets a decision. On this site that surfaced `video-caption` on every page
+  carrying a GIF-transcoded clip: silent video, so WCAG 1.2.2 does not apply,
+  but axe cannot tell a silent track from an uncaptioned one.
+- **`COMPREHENSIVE_TAGS` exists so the widening is one import, not a literal.**
+  Consumers that pasted a tag array would drift from each other and from the
+  reasoning; the default stays WCAG A/AA because that is what a conformance gate
+  owes, and `best-practice` is the opt-in that catches landmark structure.
+- **`include`/`exclude` are called once per selector.** Passing an array to
+  axe's builder means a chain of nested-iframe selectors, not a set of roots —
+  a set silently scopes the scan to nothing, and a scan of nothing passes.
+
+Wired into a real site it found a `<button>` inside a `<summary>`
+(`nested-interactive`): the copy control in a modal, which a
+`stopPropagation` handler had made work for a mouse and for nobody else.
+
 ## Releasing
 
 Conventional commits; release-please opens the PR, merging publishes with

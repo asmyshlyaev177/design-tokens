@@ -6,6 +6,7 @@ export default defineConfig({
   entry: [
     "src/index.ts",
     "src/contrast.ts",
+    "src/axe.ts",
     "src/lighthouse.ts",
     "src/bin/check-tokens.ts",
   ],
@@ -18,7 +19,12 @@ export default defineConfig({
   sourcemap: true,
   /* Never inline the optional peers: a CSS-only consumer installs none of them. */
   deps: {
-    neverBundle: ["@playwright/test", "playwright-lighthouse", "lighthouse"],
+    neverBundle: [
+      "@playwright/test",
+      "playwright-lighthouse",
+      "lighthouse",
+      "@axe-core/playwright",
+    ],
   },
   hooks: {
     "build:done": () => {
